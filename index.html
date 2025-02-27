@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>For My Love</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background: linear-gradient(to right, #ff758c, #ff7eb3);
+            color: white;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            height: 100vh;
+        }
+
+        #message {
+            font-size: 1.5em;
+            max-width: 600px;
+            text-align: center;
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
+            position: absolute;
+            z-index: 3;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 10px;
+            border-radius: 10px;
+        }
+
+        .media-container {
+            position: absolute;
+            width: 800px;
+            height: 800px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .media {
+            position: absolute;
+            width: 200px;
+            height: auto;
+            object-fit: cover;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+            transform-origin: center;
+        }
+
+        @keyframes rotate {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .media-container {
+            animation: rotate 15s linear infinite;
+        }
+
+        .media.fixed {
+            transform: none !important;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <p id="message" class="text-white text-2xl font-bold"></p>
+        <div class="media-container" id="media-container"></div>
+    </div>
+    <script>
+        const messages = [
+            "You are my sunshine.",
+            "Every heartbeat whispers your name.",
+            "My love for you is endless.",
+            "You are my forever and always.",
+            "You make my world brighter."
+        ];
+        let index = 0;
+        function changeMessage() {
+            const messageElem = document.getElementById("message");
+            messageElem.style.opacity = 0;
+            setTimeout(() => {
+                messageElem.innerText = messages[index];
+                messageElem.style.opacity = 1;
+                index = (index + 1) % messages.length;
+            }, 1000);
+        }
+        setInterval(changeMessage, 2000);
+        changeMessage();
+
+        const mediaFiles = [
+            "assets/img 1.jpg", "assets/img 2.jpg", "assets/img 3.jpg", "assets/img 4.jpg",
+            "assets/img 5.jpg", "assets/img 6.jpg", "assets/img 7.jpg", "assets/img 8.jpg",
+            "assets/vid 1.mp4", "assets/vid 2.mp4"
+        ];
+        const mediaContainer = document.getElementById("media-container");
+        mediaFiles.forEach((src, i) => {
+            let mediaElement;
+            if (src.endsWith(".mp4")) {
+                mediaElement = document.createElement("video");
+                mediaElement.src = src;
+                mediaElement.classList.add("media");
+                mediaElement.autoplay = true;
+                mediaElement.loop = true;
+                mediaElement.muted = true;
+            } else {
+                mediaElement = document.createElement("img");
+                mediaElement.src = src;
+                mediaElement.classList.add("media");
+            }
+            mediaElement.alt = src.split('/').pop();
+            let angle = (i * (360 / mediaFiles.length));
+            let x = Math.cos(angle * Math.PI / 180) * 350;
+            let y = Math.sin(angle * Math.PI / 180) * 350;
+            mediaElement.style.transform = `translate(${x}px, ${y}px) rotate(${-angle}deg)`;
+            mediaElement.style.transformOrigin = "center center";
+            mediaContainer.appendChild(mediaElement);
+        });
+    </script>
+</body>
+
+</html>
