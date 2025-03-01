@@ -10,7 +10,7 @@
         body {
             font-family: Arial, sans-serif;
             text-align: center;
-            background: linear-gradient(to right, #ff758c, #ff7eb3);
+            background: black;
             color: white;
             margin: 0;
             padding: 0;
@@ -19,6 +19,25 @@
             justify-content: center;
             align-items: center;
             height: 100vh;
+        }
+
+        .heart {
+            position: absolute;
+            font-size: 25px;
+            animation: float 5s infinite ease-in-out;
+            z-index: 0;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(0);
+                opacity: 1;
+            }
+
+            100% {
+                transform: translateY(-250px);
+                opacity: 0;
+            }
         }
 
         .container {
@@ -30,23 +49,10 @@
             height: 100vh;
         }
 
-        #message {
-            font-size: 1.5em;
-            max-width: 600px;
-            text-align: center;
-            opacity: 0;
-            transition: opacity 1s ease-in-out;
-            position: absolute;
-            z-index: 3;
-            background: rgba(0, 0, 0, 0.5);
-            padding: 10px;
-            border-radius: 10px;
-        }
-
         .media-container {
             position: absolute;
-            width: 800px;
-            height: 800px;
+            width: 1000px;
+            height: 1000px;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -54,87 +60,108 @@
 
         .media {
             position: absolute;
-            width: 200px;
+            width: 240px;
             height: auto;
             object-fit: cover;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
-            transform-origin: center;
+            opacity: 0;
+            transition: transform 2s ease-in-out, opacity 2s ease-in-out;
+            z-index: 1;
         }
 
-        @keyframes rotate {
-            0% {
-                transform: rotate(0deg);
-            }
-
-            100% {
-                transform: rotate(360deg);
-            }
-        }
-
-        .media-container {
-            animation: rotate 15s linear infinite;
-        }
-
-        .media.fixed {
-            transform: none !important;
+        .show {
+            opacity: 1 !important;
         }
     </style>
 </head>
 
 <body>
     <div class="container">
-        <p id="message" class="text-white text-2xl font-bold"></p>
-        <div class="media-container" id="media-container"></div>
+        <img id="start-btn" src="assets/img1.jpg" class="cursor-pointer w-64" alt="Start">
+        <p id="message" class="text-white text-2xl font-bold hidden" style="z-index: 2;"></p>
+        <div class="media-container hidden" id="media-container"></div>
     </div>
+    <audio id="bg-music" src="assets/song.mp3" loop></audio>
+
     <script>
-        const messages = [
-            "You are my sunshine.",
-            "Every heartbeat whispers your name.",
-            "My love for you is endless.",
-            "You are my forever and always.",
-            "You make my world brighter."
-        ];
-        let index = 0;
-        function changeMessage() {
-            const messageElem = document.getElementById("message");
-            messageElem.style.opacity = 0;
-            setTimeout(() => {
-                messageElem.innerText = messages[index];
-                messageElem.style.opacity = 1;
-                index = (index + 1) % messages.length;
-            }, 1000);
-        }
-        setInterval(changeMessage, 2000);
-        changeMessage();
+        document.getElementById("start-btn").addEventListener("click", function () {
+            this.style.display = "none";
+            document.getElementById("bg-music").play();
+            animateMedia();
+            createHearts();
+        });
 
         const mediaFiles = [
-            "assets/img1.jpg", "assets/img2.jpg", "assets/img3.jpg", "assets/img4.jpg",
+            "assets/img2.jpg", "assets/img3.jpg", "assets/img4.jpg",
             "assets/img5.jpg", "assets/img6.jpg", "assets/img7.jpg", "assets/img8.jpg",
             "assets/vid1.mp4", "assets/vid2.mp4"
         ];
         const mediaContainer = document.getElementById("media-container");
-        mediaFiles.forEach((src, i) => {
-            let mediaElement;
-            if (src.endsWith(".mp4")) {
-                mediaElement = document.createElement("video");
-                mediaElement.src = src;
+        let delay = 1000;
+
+        function animateMedia() {
+            mediaContainer.classList.remove("hidden");
+            mediaFiles.forEach((src, i) => {
+                let mediaElement;
+                if (src.endsWith(".mp4")) {
+                    mediaElement = document.createElement("video");
+                    mediaElement.src = src;
+                    mediaElement.autoplay = true;
+                    mediaElement.loop = true;
+                    mediaElement.muted = true;
+                } else {
+                    mediaElement = document.createElement("img");
+                    mediaElement.src = src;
+                }
                 mediaElement.classList.add("media");
-                mediaElement.autoplay = true;
-                mediaElement.loop = true;
-                mediaElement.muted = true;
-            } else {
-                mediaElement = document.createElement("img");
-                mediaElement.src = src;
-                mediaElement.classList.add("media");
+                mediaElement.alt = src.split('/').pop();
+                mediaContainer.appendChild(mediaElement);
+                setTimeout(() => {
+                    let angle = (i * (360 / mediaFiles.length));
+                    let x = Math.cos(angle * Math.PI / 180) * 450;
+                    let y = Math.sin(angle * Math.PI / 180) * 450;
+                    mediaElement.style.transform = `translate(${x}px, ${y}px) rotate(${-angle}deg)`;
+                    mediaElement.classList.add("show");
+                }, i * delay);
+            });
+            setTimeout(startMessages, mediaFiles.length * delay);
+        }
+
+        function startMessages() {
+            const messages = [
+                "You are the melody to my heart's song.",
+                "My soul belongs to you, forever and always.",
+                "Every moment with you feels like a dream.",
+                "You are my world, my love, my everything.",
+                "I found my forever in your arms."
+            ];
+            let index = 0;
+            const messageElem = document.getElementById("message");
+            messageElem.classList.remove("hidden");
+
+            function changeMessage() {
+                messageElem.style.opacity = 0;
+                setTimeout(() => {
+                    messageElem.innerText = messages[index];
+                    messageElem.style.opacity = 1;
+                    index = (index + 1) % messages.length;
+                }, 1000);
             }
-            mediaElement.alt = src.split('/').pop();
-            let angle = (i * (360 / mediaFiles.length));
-            let x = Math.cos(angle * Math.PI / 180) * 350;
-            let y = Math.sin(angle * Math.PI / 180) * 350;
-            mediaElement.style.transform = `translate(${x}px, ${y}px) rotate(${-angle}deg)`;
-            mediaElement.style.transformOrigin = "center center";
-            mediaContainer.appendChild(mediaElement);
-        });
+            setInterval(changeMessage, 2000);
+            changeMessage();
+        }
+
+        function createHearts() {
+            setInterval(() => {
+                let heart = document.createElement("div");
+                heart.classList.add("heart");
+                heart.innerHTML = "❤️";
+                document.body.appendChild(heart);
+                heart.style.left = Math.random() * window.innerWidth + "px";
+                heart.style.top = Math.random() * window.innerHeight + "px";
+                heart.style.animationDuration = (Math.random() * 3 + 2) + "s";
+                setTimeout(() => heart.remove(), 5000);
+            }, 300);
+        }
     </script>
 </body>
 
